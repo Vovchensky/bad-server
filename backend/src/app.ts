@@ -1,4 +1,3 @@
-import { errors } from 'celebrate'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import 'dotenv/config'
@@ -30,7 +29,6 @@ app.use(urlencoded({ extended: true }))
 app.use(json())
 app.options('*', cors())
 app.use(routes)
-app.use(errors())
 app.use(errorHandler)
 
 const bootstrap = async () => {
