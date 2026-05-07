@@ -11,11 +11,13 @@ import serveStatic from './middlewares/serverStatic'
 import routes from './routes'
 
 const { PORT = 3000 } = process.env
+const { ORIGIN_ALLOW = 'http://localhost:5173' } = process.env
+
 const app = express()
 
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 60 * 1000,
+    max: 20,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Слишком много запросов, попробуйте позже' },
@@ -23,11 +25,16 @@ const limiter = rateLimit({
 
 app.use(limiter)
 app.use(cookieParser())
-app.use(cors())
+app.use(
+    cors({
+        origin: ORIGIN_ALLOW,
+        credentials: true,
+    })
+)
 app.use(serveStatic(path.join(__dirname, 'public')))
-app.use(urlencoded({ extended: true }))
-app.use(json())
-app.options('*', cors())
+app.use(urlencoded({ extended: true, limit: '10kb' }))
+app.use(json({ limit: '10kb' }))
+app.options('*', cors({ origin: ORIGIN_ALLOW, credentials: true }))
 app.use(routes)
 app.use(errorHandler)
 
