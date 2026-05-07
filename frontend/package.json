@@ -27,6 +27,9 @@
     "redux-persist": "^6.0.0",
     "vite-plugin-svgr": "^4.2.0"
   },
+  "overrides": {
+    "esbuild": "0.25.0"
+  },
   "devDependencies": {
     "@types/node": "^20.12.12",
     "@types/react": "^18.2.66",
@@ -43,7 +46,7 @@
     "prettier": "^3.3.3",
     "sass": "^1.77.2",
     "typescript": "^5.2.2",
-    "vite": "^7.3.3",
+    "vite": "^6.4.2",
     "vite-tsconfig-paths": "^4.3.2"
   }
 }
