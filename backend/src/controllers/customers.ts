@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { FilterQuery } from 'mongoose'
+import BadRequestError from '../errors/bad-request-error'
 import NotFoundError from '../errors/not-found-error'
 import Order from '../models/order'
 import User, { IUser } from '../models/user'
@@ -11,9 +12,16 @@ export const getCustomers = async (
     next: NextFunction
 ) => {
     try {
+        const queryKeys = Object.keys(req.query);
+        for (let i = 0; i < queryKeys.length; i += 1) {
+            const key = queryKeys[i];
+            if (typeof req.query[key] === 'object' && !Array.isArray(req.query[key])) {
+                return next(new BadRequestError('Неверный формат запроса'));
+            }
+        }
+
         const {
             page = 1,
-            limit = 10,
             sortField = 'createdAt',
             sortOrder = 'desc',
             registrationDateFrom,
@@ -26,6 +34,8 @@ export const getCustomers = async (
             orderCountTo,
             search,
         } = req.query
+
+        const limit = Math.min(Number(req.query.limit) || 10, 10)
 
         const filters: FilterQuery<Partial<IUser>> = {}
 
@@ -114,8 +124,8 @@ export const getCustomers = async (
 
         const options = {
             sort,
-            skip: (Number(page) - 1) * Number(limit),
-            limit: Number(limit),
+            skip: (Number(page) - 1) * limit,
+            limit,
         }
 
         const users = await User.find(filters, null, options).populate([
@@ -135,7 +145,7 @@ export const getCustomers = async (
         ])
 
         const totalUsers = await User.countDocuments(filters)
-        const totalPages = Math.ceil(totalUsers / Number(limit))
+        const totalPages = Math.ceil(totalUsers / limit)
 
         res.status(200).json({
             customers: users,
@@ -143,7 +153,7 @@ export const getCustomers = async (
                 totalUsers,
                 totalPages,
                 currentPage: Number(page),
-                pageSize: Number(limit),
+                pageSize: limit,
             },
         })
     } catch (error) {

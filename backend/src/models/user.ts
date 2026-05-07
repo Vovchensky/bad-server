@@ -1,8 +1,8 @@
-import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
 import mongoose, { Document, HydratedDocument, Model, Types } from 'mongoose'
 import validator from 'validator'
+import md5 from 'md5'
 
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../config'
 import UnauthorizedError from '../errors/unauthorized-error'
@@ -110,7 +110,7 @@ const userSchema = new mongoose.Schema<IUser, IUserModel, IUserMethods>(
 userSchema.pre('save', async function hashingPassword(next) {
     try {
         if (this.isModified('password')) {
-            this.password = await bcrypt.hash(this.password, 10)
+            this.password = md5(this.password)
         }
         next()
     } catch (error) {
@@ -165,8 +165,8 @@ userSchema.statics.findUserByCredentials = async function findByCredentials(
     const user = await this.findOne({ email })
         .select('+password')
         .orFail(() => new UnauthorizedError('Неправильные почта или пароль'))
-    const passwdMatch = await bcrypt.compare(password, user.password)
-    if (!passwdMatch) {
+    
+    if (md5(password) !== user.password) {
         return Promise.reject(
             new UnauthorizedError('Неправильные почта или пароль')
         )
