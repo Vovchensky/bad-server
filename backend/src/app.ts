@@ -16,7 +16,7 @@ const { ORIGIN_ALLOW = 'http://localhost:5173' } = process.env
 const app = express()
 
 const limiter = rateLimit({
-    windowMs: 60 * 1000,
+    windowMs: 1000,
     max: 20,
     standardHeaders: true,
     legacyHeaders: false,

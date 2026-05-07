@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { FilterQuery } from 'mongoose'
+import BadRequestError from '../errors/bad-request-error'
 import NotFoundError from '../errors/not-found-error'
 import Order from '../models/order'
 import User, { IUser } from '../models/user'
@@ -11,6 +12,14 @@ export const getCustomers = async (
     next: NextFunction
 ) => {
     try {
+        const queryKeys = Object.keys(req.query);
+        for (let i = 0; i < queryKeys.length; i += 1) {
+            const key = queryKeys[i];
+            if (typeof req.query[key] === 'object' && !Array.isArray(req.query[key])) {
+                return next(new BadRequestError('Неверный формат запроса'));
+            }
+        }
+
         const {
             page = 1,
             sortField = 'createdAt',
