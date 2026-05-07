@@ -2,6 +2,7 @@ import { Request, Express } from 'express'
 import multer, { FileFilterCallback } from 'multer'
 import { mkdirSync } from 'fs'
 import { join } from 'path'
+import BadRequestError from '../errors/bad-request-error'
 
 const storage = multer.diskStorage({
     destination: (
@@ -39,13 +40,19 @@ const types = [
 ]
 
 const fileFilter = (
-    _req: Request,
+    req: Request,
     file: Express.Multer.File,
     cb: FileFilterCallback
 ) => {
     if (!types.includes(file.mimetype)) {
         return cb(null, false)
     }
+    
+    const fileSize = parseInt(req.headers['content-length'] || '0', 10)
+    if (fileSize < 2048) {
+        return cb(new BadRequestError('Файл слишком мал'))
+    }
+
     return cb(null, true)
 }
 
