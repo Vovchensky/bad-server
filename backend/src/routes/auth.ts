@@ -17,9 +17,9 @@ authRouter.get('/csrf-token', getCsrfToken)
 authRouter.get('/user', auth, getCurrentUser)
 authRouter.patch('/me', auth, validateCsrfToken, updateCurrentUser)
 authRouter.get('/user/roles', auth, getCurrentUserRoles)
-authRouter.post('/login', login)
+authRouter.post('/login', validateCsrfToken, login)
 authRouter.get('/token', refreshAccessToken)
 authRouter.get('/logout', logout)
-authRouter.post('/register', register)
+authRouter.post('/register', validateCsrfToken, register)
 
 export default authRouter
